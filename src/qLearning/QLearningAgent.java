@@ -62,36 +62,37 @@ public class QLearningAgent {
 		if (currentState.isTerminal()) {
 			QLearningTable.put(previousStateActionPair, (double) previousReward.getValue());
 			nextAction = null;
-		}
-		if (previousState != null) {
-			if (QLearningTable.get(previousStateActionPair) == null) {
-				QLearningTable.put(previousStateActionPair, 0.0);
-			}
-			// Reinforcement
-			
-			System.out.println("previousStateActionPair : " + previousStateActionPair);
-			System.out.println("OldQValue : " + QLearningTable.get(previousStateActionPair));
-			
-			double newQValue = QLearningTable.get(previousStateActionPair) + alpha * (previousReward.getValue()
-					+ gamma * maxQValue(currentState) - QLearningTable.get(previousStateActionPair));
-			
-			System.out.println("newQValue : " + newQValue);
+		} else {
+			if (previousState != null) {
+				if (QLearningTable.get(previousStateActionPair) == null) {
+					QLearningTable.put(previousStateActionPair, 0.0);
+				}
+				// Reinforcement
 
-			QLearningTable.put(previousStateActionPair, newQValue);
+				System.out.println("previousStateActionPair : " + previousStateActionPair);
+				System.out.println("OldQValue : " + QLearningTable.get(previousStateActionPair));
 
-			double p = Math.random();
-			if (p < epsilon) {
-				// Exploration
-				nextAction = (Action) Action.getRandomAction(availableActions);
-			}
-			if (epsilon > epsilonThreshold) {
-				epsilon = epsilon * 0.9999;
-			}
-		}
+				double newQValue = QLearningTable.get(previousStateActionPair) + alpha * (previousReward.getValue()
+						+ gamma * maxQValue(currentState) - QLearningTable.get(previousStateActionPair));
 
-		// initState
-		else {
-			maxQValue(currentState);
+				System.out.println("newQValue : " + newQValue);
+
+				QLearningTable.put(previousStateActionPair, newQValue);
+
+				double p = Math.random();
+				if (p < epsilon) {
+					// Exploration
+					nextAction = (Action) Action.getRandomAction(availableActions);
+				}
+				if (epsilon > epsilonThreshold) {
+					epsilon = epsilon * 0.9999;
+				}
+			}
+
+			// initState
+			else {
+				maxQValue(currentState);
+			}
 		}
 	}
 
