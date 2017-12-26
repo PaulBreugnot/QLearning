@@ -11,6 +11,9 @@ public abstract class AbstractReward implements Reward{
 	}
 	
 	public int getValue() {
+		if (HashReward.get(stateActionPair) == null) {
+			setValue(stateActionPair);
+		}
 		return HashReward.get(stateActionPair);
 	}
 	
