@@ -12,6 +12,9 @@ public interface Action {
 	}
 	
 	Object getValue();
+	
+	void executeAction();
+	
 	@Override
 	int hashCode();
 	
