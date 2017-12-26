@@ -64,6 +64,7 @@ public class QLearningAgent {
 			nextAction = null;
 		} else {
 			if (previousState != null) {
+				availableActions = currentState.getAvailableActions();
 				if (QLearningTable.get(previousStateActionPair) == null) {
 					QLearningTable.put(previousStateActionPair, 0.0);
 				}
@@ -124,9 +125,5 @@ public class QLearningAgent {
 		QLearningAgent.alpha = alpha;
 		QLearningAgent.gamma = gamma;
 		QLearningAgent.epsilonThreshold = epsilonThreshold;
-	}
-
-	public void setAvailableActions(ArrayList<Action> availableActions) {
-		QLearningAgent.availableActions = availableActions;
 	}
 }
