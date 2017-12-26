@@ -7,5 +7,4 @@ public interface Reward {
 	
 	//This function must calculate the reward with the implemented getReward function and put it in the HashTable
 	void setValue(StateActionPair stateActionPair);
-
 }

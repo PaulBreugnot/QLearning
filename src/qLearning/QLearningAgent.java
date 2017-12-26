@@ -58,8 +58,12 @@ public class QLearningAgent {
 	}
 
 	private void Learn() {
+		StateActionPair previousStateActionPair = new StateActionPair(previousState, previousAction);
+		if (currentState.isTerminal()) {
+			QLearningTable.put(previousStateActionPair, (double) previousReward.getValue());
+			nextAction = null;
+		}
 		if (previousState != null) {
-			StateActionPair previousStateActionPair = new StateActionPair(previousState, previousAction);
 			if (QLearningTable.get(previousStateActionPair) == null) {
 				QLearningTable.put(previousStateActionPair, 0.0);
 			}
