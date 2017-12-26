@@ -11,7 +11,7 @@ import qLearning.model.StateActionPair;
 public class QLearningAgent {
 	static double alpha = 0.2;
 	static double gamma = 0.9;
-	static double epsilon = 0.99;
+	static double epsilon = 1;
 	static double epsilonThreshold = 0.01;
 
 	private State previousState;
@@ -60,11 +60,13 @@ public class QLearningAgent {
 	private void Learn() {
 		StateActionPair previousStateActionPair = new StateActionPair(previousState, previousAction);
 		if (currentState.isTerminal()) {
+			System.out.println("Final state, updating Q value.");
 			QLearningTable.put(previousStateActionPair, (double) previousReward.getValue());
+			System.out.println(QLearningTable.get(previousStateActionPair));
 			nextAction = null;
 		} else {
+			availableActions = currentState.getAvailableActions();
 			if (previousState != null) {
-				availableActions = currentState.getAvailableActions();
 				if (QLearningTable.get(previousStateActionPair) == null) {
 					QLearningTable.put(previousStateActionPair, 0.0);
 				}
@@ -79,46 +81,77 @@ public class QLearningAgent {
 				System.out.println("newQValue : " + newQValue);
 
 				QLearningTable.put(previousStateActionPair, newQValue);
-
-				double p = Math.random();
-				if (p < epsilon) {
-					// Exploration
-					nextAction = (Action) Action.getRandomAction(availableActions);
-				}
-				if (epsilon > epsilonThreshold) {
-					epsilon = epsilon * 0.9999;
-				}
 			}
 
 			// initState
 			else {
 				maxQValue(currentState);
 			}
+			double p = Math.random();
+			System.out.println("epsilon : " + epsilon);
+			if (p < epsilon) {
+				// Exploration
+				explore();
+			}
+			if (epsilon > epsilonThreshold) {
+				epsilon = epsilon * 0.99;
+			}
 		}
 	}
 
 	private double maxQValue(State state) {
 		double maxQValue = -Double.MAX_VALUE;
-		if (availableActions.size() > 0) {
-			for (Action action : availableActions) {
-				StateActionPair s = new StateActionPair(state, action);
-				if (QLearningTable.get(s) == null) {
-					QLearningTable.put(s, 0.0);
-				}
-				if (QLearningTable.get(s) > maxQValue) {
-					maxQValue = QLearningTable.get(s);
-					// Exploitation
-					nextAction = s.getAction();
-				}
-			}
-			// System.out.println("Explored states number : " +
-			// QLearningTable.keySet().size());
-		}
-		if (maxQValue == -Double.MAX_VALUE) {
+		if (availableActions.size() == 0) {
+			System.out.println("Error : no action available!");
 			nextAction = null;
 			return 0;
+		} else {
+			ArrayList<Action> possibleActions = new ArrayList<>();
+			for (Action action : availableActions) {
+				StateActionPair s = new StateActionPair(state, action);
+				/*
+				 * if (QLearningTable.get(s) == null) { QLearningTable.put(s, 0.0); }
+				 */
+				if (QLearningTable.get(s) != null) {
+					if (QLearningTable.get(s) > maxQValue) {
+						maxQValue = QLearningTable.get(s);
+						// Exploitation
+						possibleActions.clear();
+						possibleActions.add(s.getAction());
+					}
+					else if (QLearningTable.get(s) == maxQValue) {
+						possibleActions.add(s.getAction());
+					}
+				}
+			}
+			nextAction = (Action) Action.getRandomAction(possibleActions);
+			// System.out.println("Explored states number : " +
+			// QLearningTable.keySet().size());
+			if (maxQValue == -Double.MAX_VALUE) {
+				// Nothing is explored yet from the current state
+				explore();
+				return 0;
+			}
+			return maxQValue;
 		}
-		return maxQValue;
+	}
+
+	public void explore() {
+		ArrayList<Action> actionsNotTriedYet = new ArrayList<>();
+		for (Action action : availableActions) {
+			StateActionPair s = new StateActionPair(currentState, action);
+			if (QLearningTable.get(s) == null) {
+				actionsNotTriedYet.add(action);
+			}
+		}
+		if (actionsNotTriedYet.size() > 0) {
+			System.out.println("Exploring a risky unknomwn environment...");
+			nextAction = (Action) Action.getRandomAction(actionsNotTriedYet);
+			QLearningTable.put(new StateActionPair(currentState, nextAction), 0.0);
+		} else {
+			System.out.println("Random action!");
+			nextAction = (Action) Action.getRandomAction(availableActions);
+		}
 	}
 
 	public void setParameters(double alpha, double gamma, double epsilonThreshold) {
